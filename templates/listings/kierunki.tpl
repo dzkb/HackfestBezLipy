@@ -6,6 +6,6 @@
 		<p>{$i.opis}</p>
 		<p><b>Popularność:</b> 100%</p>
 	</a>
-	{if $k%5 == 0}<div style="clear:both;"></div>{/if}
+	{if $k%4 == 0}<div style="clear:both;"></div>{/if}
 {/foreach}
 </div>

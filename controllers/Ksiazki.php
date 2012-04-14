@@ -31,7 +31,6 @@ class Ksiazki extends GlobalsHandler {
 		}else{
 			$query = "SELECT * FROM ksiazki WHERE przedmiot_id=".$przedmiot." AND typ_id=".$typ."";
 		}
-		echo var_dump($query);
 		$query_r = mysql_query($query) or die(mysql_error());
 		while ($result = mysql_fetch_assoc($query_r)){
 			$ksiazki[$result['id']]=$result;

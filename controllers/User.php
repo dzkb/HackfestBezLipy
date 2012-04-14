@@ -6,8 +6,6 @@ class User extends GlobalsHandler {
 	}
 	
 	public function logIn($login, $haslo){
-		ob_start();
-		session_start();
 		$smarty=new Smarty();
 	
 		if (!$_SESSION['logged']) {
@@ -30,7 +28,6 @@ class User extends GlobalsHandler {
 			echo var_dump($_SESSION);
 			// juz zalogowany
 		}
-		ob_end_flush();
 	}
 	
 	public function logOut(){
