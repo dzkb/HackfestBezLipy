@@ -6,23 +6,32 @@ class Typer extends GlobalsHandler {
 	}
 	
 	public function wybierzPrzedmiot() {
+		$smarty=new Smarty();
 		// pobierz listę przedmiotów
 		$przedmioty = array();
-		$query = "SELECT * FROM przedmioty";
+		$query = "SELECT * FROM przedmioty ORDER BY nazwa ASC";
 		$query_r = mysql_query($query) or die(mysql_error());
 		while ($result = mysql_fetch_assoc($query_r)){
-			// info o przedmiotach
-			
+			$przedmioty[$result['id']]=$result;
 		}
+		
+		$smarty->assign("przedmioty",$przedmioty);
+		$smarty->display(CFG_DIR_TPL.'/listings/typer_przedmioty.tpl');
 	}
 	
 	public function pobierzTematyki($przedmiot) {
+		$smarty=new Smarty();
 		// pobierz tematyki do typera
-		$query = "SELECT * FROM zagadnienia WHERE id_przedmiotu=".$przedmiot;
+		$query = "SELECT * FROM zagadnienia WHERE id_przedmiotu=".$przedmiot." ORDER BY glosy DESC";
 		$query_r=mysql_query($query) or die(mysql_error());
+		if (mysql_num_rows($query_r) != 1) { $this->wybierzPrzedmiot(); }
 		while ($result = mysql_fetch_assoc($query_r)){
-			// info o zagadnieniach i linki do glosowania GET ?vote=$result['id']
+			$zagadnienia[$result['id']]=$result;
 		}
+		
+		$smarty->assign("zagadnienia",$zagadnienia);
+		$smarty->display(CFG_DIR_TPL."listings/typer_zagadnienia.tpl");
+		
 	}
 	
 	public function zaglosujNaZagadnienie($id_zagadnienia){
@@ -35,22 +44,23 @@ class Typer extends GlobalsHandler {
 		}else{
 			$result = mysql_fetch_array($query_r);
 			if ((time() - $result['czas_glosowania']) > 172800){
+				$query = "DELETE FROM glosowania WHERE ip=".ip2long($ip);
+				$query_r=mysql_query($query) or die(mysql_error());
 				$pass = true;
 			}
 		}
-		if (mysql_num_rows($query_r) == 0) 
-		session_start();
-		if ($_SESSION['logged'] == true) {
+		if($pass) {
 			$query = "SELECT * FROM zagadnienia WHERE id=".$id_zagadnienia;
 			$query_r=mysql_query($query) or die(mysql_error());
+			if (mysql_num_rows($query_r) != 1) { $this->wybierzPrzedmiot(); }
 			$zagadnienie = mysql_fetch_array($query_r);
 			// teraz mamy do dyspozycji pola id, nazwa, id przedmiotu i glosy
 			$query = "UPDATE zagadnienia SET glosy=".$zagadnienie['glosy']+1 ." WHERE id=".$id_zagadnienia;
 			$query_r=mysql_query($query) or die(mysql_error());
 			$query = "INSERT INTO glosowania (ip) VALUES (".ip2long($ip).")";
-		}else{
-			// niezalogowany - przekieruj na user
+			$query_r=mysql_query($query) or die(mysql_error());
 		}
+		$this->pobierzTematyki(stripslashes($_GET['przedmiot']));
 	}
 	
 	public function controller() {

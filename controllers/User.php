@@ -6,8 +6,9 @@ class User extends GlobalsHandler {
 	}
 	
 	public function logIn($login, $haslo){
+		session_start();
+		ob_start();
 		$smarty=new Smarty();
-	
 		if (!$_SESSION['logged']) {
 			$haslo = sha1($haslo);
 			$query = "SELECT * FROM uzytkownicy WHERE login='".mysql_real_escape_string($login)."' AND haslo='".mysql_real_escape_string($haslo)."'";
@@ -28,6 +29,7 @@ class User extends GlobalsHandler {
 			echo var_dump($_SESSION);
 			// juz zalogowany
 		}
+		ob_end_flush();
 	}
 	
 	public function logOut(){
@@ -42,7 +44,7 @@ class User extends GlobalsHandler {
 	}
 	
 	public function showProfile(){
-	
+		//session_start();
 		if ($_SESSION['logged'] == true) {
 			$query = "SELECT * FROM uzytkownicy WHERE id=".$_SESSION['uid'];
 			$query_r=mysql_query($query) or die(mysql_error());
@@ -131,7 +133,7 @@ class User extends GlobalsHandler {
 	
 	public function controller() {
 		if ($_GET['logout'] == 1){
-			$this->logOut();
+			//$this->logOut();
 		}elseif ($_GET['register'] == 1){
 			$this->register();
 		}else{

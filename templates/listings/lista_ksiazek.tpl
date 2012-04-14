@@ -8,6 +8,7 @@
 {/foreach}
 </ul>
 </div>
+<a href="?action=ksiazki&przedmiot={$smarty.get.przedmiot}&dodaj=1">Zaproponuj książkę</a>
 {foreach from=$ksiazki key=k item=i}
 	<h3><a href="?action=ksiazki&ksiazka={$i.id}&przedmiot={$smarty.get.przedmiot}">{$i.nazwa}</a></h3>
 	<p><b>Autor:</b> {$i.autor}</p>

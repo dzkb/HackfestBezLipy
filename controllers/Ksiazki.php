@@ -56,20 +56,76 @@ class Ksiazki extends GlobalsHandler {
 		$q_run=mysql_query($query) or die(mysql_error());
 		$q_res=mysql_fetch_assoc($q_run);
 		
+		// szukam komentarzy
+		
+		$query="SELECT * FROM ksiazki_komentarze WHERE ksiazka_id=".$id." LIMIT 5";
+		$q_run2=mysql_query($query) or die(mysql_error());
+		while($q_res2=mysql_fetch_assoc($q_run2)) {
+			$komentarze[$q_res2['id']]=$q_res2;
+		}
+		
 		$smarty = new Smarty();
+		$smarty->assign('komentarze',$komentarze);
 		$smarty->assign('ksiazka',$q_res);
 		$smarty->display(CFG_DIR_TPL.'ksiazka.tpl');
 	}
 	
+	public function dodajKomentarz($id) {
+		$smarty=new Smarty();
+		if($_POST) {
+			if($_POST['nick']&&$_POST['tresc'])
+			{
+				$query = "INSERT INTO ksiazki_komentarze(ksiazka_id,nick,tresc,datetime,rating) VALUES(".$id.",'".$_POST["nick"]."','".$_POST["tresc"]."',NOW(),0)";
+				$q_run = mysql_query($query) or die(mysql_error());
+				$this->pobierzOpisKsiazki($id);
+			}
+			else {
+				$smarty->assign('error',1);
+			}
+		}
+		else {
+			$smarty->display(CFG_DIR_TPL.'forms/komentarz_ksiazka.tpl');
+		}
+	}
+	
+	public function dodajKsiazke() {
+		$smarty=new Smarty();
+		if($_POST){
+			if($_POST['nazwa']&&$_POST['autor']&&$_POST['opis']) {
+				if(!$_GET['typ'])
+					$_GET['typ']=1; // na pałę
+				$query="INSERT INTO ksiazki(przedmiot_id,typ_id,nazwa,autor,opis) VALUES(".$_GET["przedmiot"].",".$_GET["typ"].",'".$_POST["nazwa"]."','".$_POST["autor"]."','".$_POST["opis"]."')";
+				$q_run=mysql_query($query) or die(mysql_error().$query);
+				$this->pobierzKsiazki($_GET['przedmiot'],$_GET['typ']);
+			}
+			else {
+				$smarty->assign('error',1);
+				$smarty->display(CFG_DIR_TPL.'forms/dodaj_ksiazke.tpl');
+			}
+		}
+		else
+		{
+			$smarty->display(CFG_DIR_TPL.'forms/dodaj_ksiazke.tpl');
+		}
+	}
+	
 	public function controller() {
 		if($_GET['ksiazka']) {
-			$this->pobierzOpisKsiazki(stripslashes($_GET['ksiazka']));
+			if($_GET['komentarz']==1)
+				$this->dodajKomentarz(stripslashes($_GET['ksiazka']));
+			else
+				$this->pobierzOpisKsiazki(stripslashes($_GET['ksiazka']));
 		}
 		elseif($_GET['przedmiot']) {
-			if($_GET['typ']) {
-				$this->pobierzKsiazki(stripslashes($_GET['przedmiot']), stripslashes($_GET['typ']));
-			}else{
-				$this->pobierzKsiazki(stripslashes($_GET['przedmiot']), 0);
+			if($_GET['dodaj']==1){
+				$this->dodajKsiazke();
+			}
+			else {
+				if($_GET['typ']) {
+					$this->pobierzKsiazki(stripslashes($_GET['przedmiot']), stripslashes($_GET['typ']));
+				}else{
+					$this->pobierzKsiazki(stripslashes($_GET['przedmiot']), 0);
+				}
 			}
 		}
 		else {
