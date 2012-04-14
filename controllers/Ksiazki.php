@@ -120,13 +120,11 @@ $smarty->assign("recaptcha",recaptcha_get_html($publickey));
 												$_POST["recaptcha_challenge_field"],
 												$_POST["recaptcha_response_field"]);
 			if($_POST['nazwa']&&$_POST['autor']&&$_POST['opis']) {
-				if(!$_GET['typ'])
-					$_GET['typ']=1; // na pałę
 				if (!$resp->is_valid) {
 					$smarty->assign('captchaerror',1);
 				}
 				else {
-					$query="INSERT INTO ksiazki(przedmiot_id,typ_id,nazwa,autor,opis) VALUES(".$_GET["przedmiot"].",".$_GET["typ"].",'".$_POST["nazwa"]."','".$_POST["autor"]."','".$_POST["opis"]."')";
+					$query="INSERT INTO ksiazki(przedmiot_id,typ_id,nazwa,autor,opis) VALUES(".$_GET["przedmiot"].",".$_POST["rodzaj"].",'".$_POST["nazwa"]."','".$_POST["autor"]."','".$_POST["opis"]."')";
 					$q_run=mysql_query($query) or die(mysql_error().$query);
 					$this->pobierzKsiazki($_GET['przedmiot'],$_GET['typ']);
 				}

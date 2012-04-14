@@ -63,3 +63,10 @@ a.div_kierunek:hover {
 	text-decoration:none !important;
 	opacity:0.5;
 }
+.przedmiotBox {
+	width:150px;
+	height:75px;
+	font-size:1.2em;
+	padding:5px;
+	float:left;
+}

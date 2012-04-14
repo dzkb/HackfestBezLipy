@@ -37,7 +37,7 @@ class Typer extends GlobalsHandler {
 	public function zaglosujNaZagadnienie($id_zagadnienia){
 		$pass = false;
 		$ip = $_SERVER['REMOTE_ADDR'];
-		$query = "SELECT * FROM glosowania WHERE ip=".ip2long($ip);
+		$query = "SELECT * FROM glosowania WHERE ip=".ip2long($ip)." AND przedmiot=".$_GET["przedmiot"];
 		$query_r=mysql_query($query) or die(mysql_error());
 		if (mysql_num_rows($query_r) == 0) {
 			$pass = true;
@@ -53,7 +53,7 @@ class Typer extends GlobalsHandler {
 		if($pass) {
 			$query = "UPDATE zagadnienia SET glosy=glosy+1 WHERE id=".$id_zagadnienia;
 			$query_r=mysql_query($query) or die(mysql_error());
-			$query = "INSERT INTO glosowania (ip) VALUES (".ip2long($ip).")";
+			$query = "INSERT INTO glosowania (ip,przedmiot) VALUES (".ip2long($ip).",".$_GET["przedmiot"].")";
 			$query_r=mysql_query($query) or die(mysql_error());
 		}
 		$this->pobierzTematyki(stripslashes($_GET['przedmiot']));
