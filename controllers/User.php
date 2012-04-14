@@ -6,9 +6,11 @@ class User extends GlobalsHandler {
 	}
 	
 	public function logIn($login, $haslo){
+		ob_start();
+		session_start();
 		$smarty=new Smarty();
 	
-		if ($_SESSION['logged'] != true) {
+		if (!$_SESSION['logged']) {
 			$haslo = sha1($haslo);
 			$query = "SELECT * FROM uzytkownicy WHERE login='".mysql_real_escape_string($login)."' AND haslo='".mysql_real_escape_string($haslo)."'";
 			$query_r=mysql_query($query) or die(mysql_error());
@@ -19,15 +21,22 @@ class User extends GlobalsHandler {
 				$user = mysql_fetch_array($query_r);
 				$_SESSION['logged'] = true; // zalogowano
 				$_SESSION['uid'] = $user['id']; // zalogowano
+				
+				$this->showProfile();
 			}	
-		}else{
+		}
+		else
+		{
+			echo var_dump($_SESSION);
 			// juz zalogowany
 		}
+		ob_end_flush();
 	}
 	
 	public function logOut(){
+		session_start();
 		if ($_SESSION['logged'] != true) {
-		 // wywal b³¹d/przekieruj	
+		 // wywal bÅ‚Ä…d/przekieruj	
 		}else{
 		 unset($_SESSION['logged']);
 		 unset($_SESSION['uid']);
@@ -36,15 +45,18 @@ class User extends GlobalsHandler {
 	}
 	
 	public function showProfile(){
+	
 		if ($_SESSION['logged'] == true) {
-			$query = "SELECT * FROM uzytkownicy WHERE id=".$_SESSION['id'];
+			$query = "SELECT * FROM uzytkownicy WHERE id=".$_SESSION['uid'];
 			$query_r=mysql_query($query) or die(mysql_error());
 			$user = mysql_fetch_array($query_r);
-			// wyœwietl profil
+			// wyÅ›wietl profil
+			
 		}else{
 			if($_POST)
 				$this->logIn($_POST['login'],$_POST['haslo']);
 			else {
+				echo var_dump($_SESSION);
 				$smarty=new Smarty();
 				$smarty->display(CFG_DIR_TPL."forms/login.tpl");
 			}
@@ -52,8 +64,10 @@ class User extends GlobalsHandler {
 	}
 	
 	public function register(){
-		if ($_SESSION['logged'] != true) {
-			if ($_POST['sent'] == 1) {
+		$smarty=new Smarty();
+		if ($_SESSION['logged'] != true)
+		{
+			if ($_POST) {
 				/* sprawdzam argumenty
 					wymagane:
 					$_POST['login']
@@ -65,28 +79,56 @@ class User extends GlobalsHandler {
 					$_POST['miejscowosc']
 					$_POST['zainteresowania']
 				*/
-				
-				$query = "SELECT * FROM uzytkownicy WHERE login=".mysql_real_escape_string($_POST['login'])." OR email=".mysql_real_escape_string($_POST['email']);
-				$query_r=mysql_query($query) or die(mysql_error());
-				if (mysql_num_rows($result) == 1) {
-					// user istnieje
-				}else{
-					if ($_POST['haslo'] == $_POST['hasloconfirmation']) {
-						if ($_POST['haslo'] == $_POST['hasloconfirmation']) {
-							// dodawanie usera do bazy
-							$time = time();
-							$query = "INSERT INTO uzytkownicy (login, haslo, email, miejscowosc, zainteresowania) VALUES (".mysql_real_escape_string($_POST['login']).", ".mysql_real_escape_string($_POST['haslo']).", ".mysql_real_escape_string($_POST['email']).", ".mysql_real_escape_string($_POST['miejscowosc']).", ".mysql_real_escape_string($_POST['zainteresowania']).")"; 
-						}else{
-							// emaile nie zgadzaja sie
+				if($_POST['login']&&$_POST['haslo']&&$_POST['hasloconfirmation']&&$_POST['email']&&$_POST['emailconfirmation'])
+				{
+					$query = "SELECT * FROM uzytkownicy WHERE login='".stripslashes($_POST['login'])."' OR email='".stripslashes($_POST['email'])."'";
+					$query_r=mysql_query($query) or die(mysql_error());
+					if (mysql_num_rows($query_r) == 1)
+					{
+						$smarty->assign("user_exists",1);
+						$smarty->display(CFG_DIR_TPL."forms/register.tpl");
+					}
+					else
+					{
+						if ($_POST['haslo'] == $_POST['hasloconfirmation'])
+						{
+							if ($_POST['email'] == $_POST['emailconfirmation']) {
+								// dodawanie usera do bazy
+								$time = time();
+								$haslo = sha1($_POST['haslo']);
+								$query = "INSERT INTO uzytkownicy (login, haslo, email, miejscowosc, zainteresowania) VALUES ('".stripslashes($_POST['login'])."', '".stripslashes($haslo)."', '".stripslashes($_POST['email'])."','".stripslashes($_POST['miejscowosc'])."','".stripslashes($_POST['zainteresowania'])."')"; 
+								$q_run = mysql_query($query) or die(mysql_error());
+								
+								$smarty->assign("confirmreg",1);								
+								$smarty->display(CFG_DIR_TPL."forms/register.tpl");
+							}
+							else
+							{
+								$smarty->assign("wrong_emails",1);
+								$smarty->display(CFG_DIR_TPL."forms/register.tpl");
+							}
 						}
-					}else{
-						// hasla nie zgadzaja sie
+						else
+						{
+							$smarty->assign("wrong_passwords",1);
+							$smarty->display(CFG_DIR_TPL."forms/register.tpl");
+						}
 					}
 				}
-			}else{
+				else
+				{
+					$smarty->assign("fields",1);
+					$smarty->display(CFG_DIR_TPL."forms/register.tpl");
+				}
 			}
-		}else{
-			// wywal b³¹d/przekieruj	
+			else{
+				// formularz rejestracji
+				$smarty->display(CFG_DIR_TPL."forms/register.tpl");
+			}
+		}
+		else
+		{
+			header("Location:index.php");
 		}
 	}
 	
