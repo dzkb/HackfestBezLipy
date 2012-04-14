@@ -1,0 +1,23 @@
+Hackfest 2012
+#############
+Team Bez Lipy:
+* Janek Witowski (szef zespoï¿½u)
+* Kuba Cwynar
+zaczynamy sie bawic od 19 w piatek
+hackfest.pl
+lo-lancut.pl
+#############
+kontakt:
+gg 6974652 janek
+mail jwitos at gmail dot com janek
+#############
+<<<<<<< HEAD
+# info o frameworku
+#############
+# Gdy uruchamiasz widok w kontrolerze (z pliku np. /templates/homepage.tpl) rób to tak:
+# 		$smarty->display(CFG_DIR_TPLAJAX.'homepage.tpl');
+#
+#
+=======
+na razie w repo podstawowy framework
+>>>>>>> origin/master
