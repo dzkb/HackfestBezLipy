@@ -72,31 +72,64 @@ class Ksiazki extends GlobalsHandler {
 	
 	public function dodajKomentarz($id) {
 		$smarty=new Smarty();
+	require_once('recaptchalib.php');
+  $privatekey = "6LcqNtASAAAAAA0Qox2vl18atreXKV-LZ7dQ7BJF";
+  $publickey="6LcqNtASAAAAANTlv5YnBJiFxA11OPPKQcGUODaa";
+  $smarty->assign("recaptcha",recaptcha_get_html($publickey));
 		if($_POST) {
 			if($_POST['nick']&&$_POST['tresc'])
 			{
+				  $resp = recaptcha_check_answer ($privatekey,
+												$_SERVER["REMOTE_ADDR"],
+												$_POST["recaptcha_challenge_field"],
+												$_POST["recaptcha_response_field"]);
+
+
+				  if (!$resp->is_valid) {
+					$smarty->assign('captchaerror',1);
+					$smarty->display(CFG_DIR_TPL.'forms/komentarz_ksiazka.tpl');
+				  } else {
+   
+  
 				$query = "INSERT INTO ksiazki_komentarze(ksiazka_id,nick,tresc,datetime,rating) VALUES(".$id.",'".$_POST["nick"]."','".$_POST["tresc"]."',NOW(),0)";
 				$q_run = mysql_query($query) or die(mysql_error());
 				$this->pobierzOpisKsiazki($id);
+				}
 			}
 			else {
 				$smarty->assign('error',1);
+				$smarty->display(CFG_DIR_TPL.'forms/komentarz_ksiazka.tpl');
 			}
 		}
 		else {
+			//rekapcia
+					  
 			$smarty->display(CFG_DIR_TPL.'forms/komentarz_ksiazka.tpl');
 		}
 	}
 	
 	public function dodajKsiazke() {
 		$smarty=new Smarty();
+require_once('recaptchalib.php');
+$privatekey = "6LcqNtASAAAAAA0Qox2vl18atreXKV-LZ7dQ7BJF";
+$publickey="6LcqNtASAAAAANTlv5YnBJiFxA11OPPKQcGUODaa";
+$smarty->assign("recaptcha",recaptcha_get_html($publickey));
 		if($_POST){
+		 $resp = recaptcha_check_answer ($privatekey,
+												$_SERVER["REMOTE_ADDR"],
+												$_POST["recaptcha_challenge_field"],
+												$_POST["recaptcha_response_field"]);
 			if($_POST['nazwa']&&$_POST['autor']&&$_POST['opis']) {
 				if(!$_GET['typ'])
 					$_GET['typ']=1; // na pałę
-				$query="INSERT INTO ksiazki(przedmiot_id,typ_id,nazwa,autor,opis) VALUES(".$_GET["przedmiot"].",".$_GET["typ"].",'".$_POST["nazwa"]."','".$_POST["autor"]."','".$_POST["opis"]."')";
-				$q_run=mysql_query($query) or die(mysql_error().$query);
-				$this->pobierzKsiazki($_GET['przedmiot'],$_GET['typ']);
+				if (!$resp->is_valid) {
+					$smarty->assign('captchaerror',1);
+				}
+				else {
+					$query="INSERT INTO ksiazki(przedmiot_id,typ_id,nazwa,autor,opis) VALUES(".$_GET["przedmiot"].",".$_GET["typ"].",'".$_POST["nazwa"]."','".$_POST["autor"]."','".$_POST["opis"]."')";
+					$q_run=mysql_query($query) or die(mysql_error().$query);
+					$this->pobierzKsiazki($_GET['przedmiot'],$_GET['typ']);
+				}
 			}
 			else {
 				$smarty->assign('error',1);

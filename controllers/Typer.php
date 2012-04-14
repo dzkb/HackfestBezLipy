@@ -41,21 +41,17 @@ class Typer extends GlobalsHandler {
 		$query_r=mysql_query($query) or die(mysql_error());
 		if (mysql_num_rows($query_r) == 0) {
 			$pass = true;
-		}else{
+		}
+		else{
 			$result = mysql_fetch_array($query_r);
 			if ((time() - $result['czas_glosowania']) > 172800){
 				$query = "DELETE FROM glosowania WHERE ip=".ip2long($ip);
 				$query_r=mysql_query($query) or die(mysql_error());
 				$pass = true;
-			}
+				}
 		}
 		if($pass) {
-			$query = "SELECT * FROM zagadnienia WHERE id=".$id_zagadnienia;
-			$query_r=mysql_query($query) or die(mysql_error());
-			if (mysql_num_rows($query_r) != 1) { $this->wybierzPrzedmiot(); }
-			$zagadnienie = mysql_fetch_array($query_r);
-			// teraz mamy do dyspozycji pola id, nazwa, id przedmiotu i glosy
-			$query = "UPDATE zagadnienia SET glosy=".$zagadnienie['glosy']+1 ." WHERE id=".$id_zagadnienia;
+			$query = "UPDATE zagadnienia SET glosy=glosy+1 WHERE id=".$id_zagadnienia;
 			$query_r=mysql_query($query) or die(mysql_error());
 			$query = "INSERT INTO glosowania (ip) VALUES (".ip2long($ip).")";
 			$query_r=mysql_query($query) or die(mysql_error());
@@ -64,10 +60,11 @@ class Typer extends GlobalsHandler {
 	}
 	
 	public function controller() {
-		if($_GET['przedmiot']) {
-			$this->pobierzTematyki(stripslashes($_GET['przedmiot']));
-		}elseif ($_GET['vote']){
+		if ($_GET['vote']){
 			$this->zaglosujNaZagadnienie(stripslashes($_GET['vote']));
+		}
+		elseif($_GET['przedmiot']) {
+			$this->pobierzTematyki(stripslashes($_GET['przedmiot']));
 		}else{
 			$this->wybierzPrzedmiot();
 		}

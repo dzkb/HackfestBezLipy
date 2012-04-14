@@ -16,7 +16,6 @@
 				<li><a href="index.php?action=ksiazki" title="Twoje książki do matury">książki</a></li>
 				<li><a href="index.php?action=kierunki" title="Gdzie na studia? Znajdź wymarzony kierunek">kierunki</a></li>
 				<li><a href="index.php?action=typer" title="Typuj co się pojawi na tegorocznej maturze">typer 2012</a></li>
-				<li><a href="index.php?action=user" title="Zaloguj się" class="b">{if $smarty.session.logged==true}Witaj, {$username}!{else}zaloguj się{/if}</a></li>
 			</ul>
 		</div>
 	</div>
